@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Case Classification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .output-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 200px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .result-container {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid #e9ecef;
+            min-height: 200px;
+        }
+
+        .prediction-result {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .prediction-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 2px solid #28a745;
+        }
+
+        .prediction-error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border: 2px solid #dc3545;
+        }
+
+        .prediction-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .confidence-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .top-predictions {
+            margin-top: 20px;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .status-online {
+            background: #28a745;
+        }
+
+        .status-offline {
+            background: #dc3545;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .law-areas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .law-area-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .info-section {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            margin-top: 20px;
+        }
+
+        .api-docs {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="status-indicator" id="statusIndicator">
+        <span id="statusText">Checking...</span>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Legal Case Classifier</h1>
+            <p>Classify legal case reports into specific areas of law using AI</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">Case Report Input</h2>
+                <div class="form-group">
+                    <label for="caseReport">Enter Legal Case Report:</label>
+                    <textarea 
+                        id="caseReport" 
+                        placeholder="Paste your legal case report here. Include details about the case, charges, sections, and legal proceedings..."
+                    ></textarea>
+                </div>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="classifyCase()">
+                        <span id="classifyText">Classify Case</span>
+                    </button>
+                    <button class="btn-secondary" onclick="clearInput()">Clear</button>
+                    <button class="btn-success" onclick="loadSample()">Load Sample</button>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">Classification Results</h2>
+                <div class="result-container" id="resultContainer">
+                    <p style="text-align: center; color: #6c757d; margin-top: 80px;">
+                        Enter a case report and click "Classify Case" to see results
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2 class="section-title">Supported Law Areas</h2>
+            <div class="law-areas" id="lawAreas">
+                <div class="law-area-badge">Criminal Law and Procedure</div>
+                <div class="law-area-badge">Civil Procedure</div>
+                <div class="law-area-badge">Enforcement of Fundamental Rights</div>
+                <div class="law-area-badge">Company Law</div>
+            </div>
+
+            <h3>API Endpoints</h3>
+            <div class="api-docs">
+POST /predict - Classify case report
+GET /health - Check API status
+GET /law_areas - Get supported law areas
+GET /model_info - Get model information
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        let isOnline = false;
+
+        // Check API health on page load
+        window.addEventListener('load', function() {
+            checkHealth();
+            loadLawAreas();
+        });
+
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    updateStatus(true, 'API Online');
+                    isOnline = true;
+                } else {
+                    updateStatus(false, 'API Error');
+                    isOnline = false;
+                }
+            } catch (error) {
+                updateStatus(false, 'API Offline');
+                isOnline = false;
+            }
+        }
+
+        function updateStatus(online, text) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            statusText.textContent = text;
+            indicator.className = online ? 'status-indicator status-online' : 'status-indicator status-offline';
+        }
+
+        async function loadLawAreas() {
+            try {
+                const response = await fetch(`${API_BASE}/law_areas`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const lawAreasContainer = document.getElementById('lawAreas');
+                    lawAreasContainer.innerHTML = data.law_areas
+                        .map(area => `<div class="law-area-badge">${area}</div>`)
+                        .join('');
+                }
+            } catch (error) {
+                console.error('Failed to load law areas:', error);
+            }
+        }
+
+        async function classifyCase() {
+            if (!isOnline) {
+                showError('API is not available. Please check the connection.');
+                return;
+            }
+
+            const caseReport = document.getElementById('caseReport').value.trim();
+            
+            if (!caseReport) {
+                showError('Please enter a case report to classify.');
+                return;
+            }
+
+            // Show loading state
+            const classifyBtn = document.querySelector('.btn-primary');
+            const classifyText = document.getElementById('classifyText');
+            classifyText.innerHTML = '<span class="loading"></span>Classifying...';
+            classifyBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        full_report: caseReport
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    showResults(data);
+                } else {
+                    showError(data.message || 'Classification failed');
+                }
+
+            } catch (error) {
+                showError('Network error. Please check your connection.');
+                console.error('Classification error:', error);
+            } finally {
+                // Reset button state
+                classifyText.textContent = 'Classify Case';
+                classifyBtn.disabled = false;
+            }
+        }
+
+        function showResults(data) {
+            const container = document.getElementById('resultContainer');
+            
+            const confidence = Math.round(data.confidence * 100);
+            
+            container.innerHTML = `
+                <div class="prediction-result prediction-success">
+                    <div class="prediction-title">Predicted Law Area</div>
+                    <h3 style="color: #28a745; margin: 10px 0;">${data.predicted_law_area}</h3>
+                    <div style="margin: 15px 0;">
+                        <strong>Confidence: ${confidence}%</strong>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${confidence}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="top-predictions">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">All Predictions:</h4>
+                    ${data.top_predictions.map(pred => `
+                        <div class="prediction-item">
+                            <span>${pred.law_area}</span>
+                            <span style="font-weight: 600;">${Math.round(pred.confidence * 100)}%</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div style="margin-top: 20px; padding: 10px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; font-size: 12px;">
+                    <strong>Timestamp:</strong> ${new Date(data.timestamp).toLocaleString()}
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            const container = document.getElementById('resultContainer');
+            container.innerHTML = `
+                <div class="prediction-result prediction-error">
+                    <div class="prediction-title" style="color: #dc3545;">Error</div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function clearInput() {
+            document.getElementById('caseReport').value = '';
+            document.getElementById('resultContainer').innerHTML = `
+                <p style="text-align: center; color: #6c757d; margin-top: 80px;">
+                    Enter a case report and click "Classify Case" to see results
+                </p>
+            `;
+        }
+
+        function loadSample() {
+             fetch("../data/nlp.txt").then(response => response.text())
+                                .then(data => {
+                                    document.getElementById('caseReport').value = data;
+                                })
+                                .catch(err => console.error("Error loading file:", err));
+            
+        }
+
+        // Auto-refresh health status every 30 seconds
+        setInterval(checkHealth, 30000);
+    </script>
+</body>
+</html>
