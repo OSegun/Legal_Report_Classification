@@ -334,7 +334,7 @@ class ClassificationPipeline:
         
         return True
     
-    def predict(self, text: str, model_path: str = '../models/saved_model.pkl') -> Optional[Tuple[str, float]]:
+    def predict(self, text: str, model_path: str = model_path) -> Optional[Tuple[str, float]]:
         
         """
         Make prediction on new text

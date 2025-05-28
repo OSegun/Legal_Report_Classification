@@ -6,6 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     MPLBACKEND=Agg \
     UV_CACHE_DIR=/tmp/uv-cache \
+    MODEL_PATH=/app/models \
     FLASK_APP=api.py \
     FLASK_ENV=development \
     FLASK_DEBUG=1
@@ -31,8 +32,9 @@ RUN uv pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 RUN useradd --create-home --shell /bin/bash app && \
-    chown -R app:app /app && \
-    chmod -R 755 /app
+    mkdir -p /app/models /app/data /app/logs /models && \
+    chown -R app:app /app /models && \
+    chmod -R 755 /app /models
 
 USER app
 
