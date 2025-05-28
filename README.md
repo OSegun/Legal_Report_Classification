@@ -16,21 +16,21 @@ legal-case-classification/
 ├── notebooks  
 |   ├─ code.ipynb                   # Data preprocessing and model training
 ├── app                            
-|   ├─ api.py
+|   ├─ api.py                       # Flask API deployment
 ├── model_utils
-|   ├─ model_utils_classifier             # Trained model (generated after training)
-|   ├─ model_utils_pipeline
+|   ├─ model_utils_classifier       # Model Classifier
+|   ├─ model_utils_pipeline         # Entire end-to-end pipeline
 ├── src
-|   ├─ data             # Trained model (generated after training)
-|   ├─ embedding.py                        # Flask API deployment
-|   ├─ preprocess.py
-|   ├─ training.py
+|   ├─ data                         # Dataset
+|   ├─ embedding.py                 # BERT Embedding     
+|   ├─ preprocess.py                # Data Preprocessing
+|   ├─ training.py                  # Model training and Visualiation
 ├── models
 |   ├─ saved_model.pkl              # Trained model (generated after training)
 |   ├─ saved_preprocessor.pkl       # Text preprocessor (generated after training)     
-├── 
+├── Dockerfile 
 ├── README.md 
-└── requirements.txt                   # Python dependencies 
+└── requirements.txt                # Python dependencies 
 ```
 
 ## Installation
@@ -39,13 +39,13 @@ legal-case-classification/
 
 2. **Create a virtual environment:**
 ```bash
-python -m venv legal_nlp_env
-source legal_nlp_env/bin/activate  # On Windows: legal_nlp_env\Scripts\activate
+uv venv --python 3.11
+.venv\Scripts\activate
 ```
 
 3. **Install dependencies:**
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 ## Usage
@@ -64,7 +64,7 @@ jupyter notebook code/notebook.ipynb
 3. **Run the entire pipeline:**
 ```python
 # bash
-python -m model_utils_pipeline.py
+python -m model_utils.model_utils_pipeline
 ```
 
 This will:
@@ -273,7 +273,7 @@ Returns detailed information about the loaded model.
 "Company Law"
     ],
     "num_classes": 4,
-    "model_path": "/app/models/saved_model.pkl",
+    "model_path": "/models/saved_model.pkl",
     "loaded_at": "2025-05-27T10:25:00.000Z",
     "status": "success"
 }
@@ -314,7 +314,7 @@ Tests the classification with sample data or provided data.
 {
     "predicted_law_area": "Criminal Law and Procedure",
     "confidence": 0.75,
-    "all_predictions": {...},
+    "all_predictions": { },
     "test_mode": true,
     "sample_text": "Sample case text used for testing...",
     "timestamp": "2024-05-27T10:30:00.000Z"
@@ -461,6 +461,7 @@ Pull and run image from dockerhub:
 docker pull segunodusina/legal-classifier-flask-api:latest
 docker run -p 5000:5000 segunodusina/legal-classifier-flask-api:latest
 ```
+Note: Docker image size is about 4.3GB
 
 ## Troubleshooting
 
@@ -480,7 +481,7 @@ docker run -p 5000:5000 segunodusina/legal-classifier-flask-api:latest
 
 4. **Import errors:**
    - Ensure all dependencies are installed: `uv pip install -r requirements.txt`
-   - Check Python version compatibility (3.8+ recommended)
+   - Check Python version compatibility (3.11+ recommended)
 
 ### Performance Tips
 
@@ -495,22 +496,23 @@ docker run -p 5000:5000 segunodusina/legal-classifier-flask-api:latest
 
 ## File Descriptions
 
-- **`code.ipynb`**: Complete data preprocessing and model training pipeline
+- **`code.ipynb`**: Complete data preprocessing and model training pipeline for model developemnt
 - **`api.py`**: Flask API application for model deployment
+- **`model_utils`**: end-to-end pipeline of the whole process
 - **`requirements.txt`**: Python package dependencies
 - **`saved_model.pkl`**: Saved trained model (generated after training)
 - **`saved_preprocessor.pkl`**: Saved text preprocessor (generated after training)
 
 ## License
 
-This project is provided as-is for poc purposes.
+This project is provided for poc purposes.
 
 ## Support
 
 For issues or questions:
 1. Check the troubleshooting section above
 2. Ensure all dependencies are correctly installed
-3. Verify that model files exist before running the API
+3. Verify that model files exist before running the API, if not ensure dataset available for training a model in the pipeline
 
 ---
 
